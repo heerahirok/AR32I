@@ -1,0 +1,41 @@
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,op_instr,,,"IF stage",,,,,,,,
+,,,EX,,,,,,,,,,,
+,,,,,,,,,ld_or_st_addr,,,,,
+,,a,EX,,,,,,,,,,,
+,,,,,result,,,MUX,,,,,,
+,,,,,compare,,,,reg_wr_data,,,,,
+,,b,,,,,,,,,,,,
+,reg_data_bypass,,,,reg_data_bypass,,,,,,,,,
+,reg_wr_data_sel,,,,reg_wr_data_sel,reg_wr_data_sel,,,,,,,,
+,reg_wr_addr,,,,reg_wr_addr,,,,reg_wr_addr,,,,,
+,reg_wr_en,,,,reg_wr_en,,,,reg_wr_en,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+"Integer Arithmatic",,,,,,,,,,,,,,
+,,,,,,op_instr,,a,b,b,,result,compare,reg_wr_addr
+ADDI,"Rd <= Rs1 + { {20{imm[11]}}, imm[11:0]}",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,x,rd
+SLTI,"Rd = ( $signed(Rs1) < { {20{imm[11]}}, imm[11:0] } )",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,o,rd
+SLTIU,"Rd = ( Rs1 < { {20{imm[11]}}, imm[11:0] } )",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,o,rd
+XORI,"Rd <= Rs1 ^ { {20{imm[11]}}, imm[11:0]}",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,x,rd
+ORI,"Rd <= Rs1 | { {20{imm[11]}}, imm[11:0]}",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,x,rd
+ANDI,"Rd <= Rs1 & { {20{imm[11]}}, imm[11:0]}",,,,,,,Rs1,," { {20{imm[11]}}, imm[11:0]}",,o,x,rd
+SLLI,"Rd <= Rs1 << shamt[4:0]",,,,,,,Rs1,,shamt[4:0],,o,x,rd
+SRLI,"Rd <= Rs1 >> shamt[4:0]",,,,,,,Rs1,,shamt[4:0],,o,x,rd
+SRAI,"Rd <= $signed(Rs1) >>> shamt[4:0]",,,,,,,Rs1,,shamt[4:0],,o,x,rd
+AUIPC,"Rd <= PC + { U-imm[31:12], {12{1'b0}} }",,,,,,,PC,," { U-imm[31:12], {12{1'b0}} }",,o,x,rd
+LUI,"Rd <= { U-imm[31:12], {12{1'b0}} }",,,,,,,x0,," { U-imm[31:12], {12{1'b0}} }",,o,x,rd
+NOP,,,,,,,,x0,,0,,x,x,x
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
