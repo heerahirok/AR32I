@@ -1,6 +1,7 @@
 package riscv_defines;
 
-	parameter XLEN = 32;
+	parameter XLEN             = 32;
+	parameter INSTR_SIZE       = 32;
 //////////////////////////////////////////////////////////////////////////////
 //      _    _    _   _    ___                       _   _                  //
 //     / \  | |  | | | |  / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___  //
@@ -39,6 +40,8 @@ parameter ALU_OP_WIDTH = 6;
 	parameter [ 6:2] OPC_NMADD    = 5'b10_011;
 	parameter [ 6:2] OPC_OP_FP    = 5'b10_100;
 	parameter [ 6:2] OPC_BRANCH   = 5'b11_000;
-	parameter [ 6:2]  OPC_JALR     = 5'b11_001;
+	parameter [ 6:2] OPC_JALR     = 5'b11_001;
 	parameter [ 6:2] OPC_JAL      = 5'b11_011;
 	parameter [ 6:2] OPC_SYSTEM   = 5'b11_100;
+
+	parameter PCLEN               = 20;

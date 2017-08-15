@@ -27,20 +27,20 @@ module asa_id_stage (
   input                           clk,
   output reg                      id_stall,
 
-  input                           bu_flush,
+/*  input                           bu_flush,
                                   st_flush,
                                   du_flush,
   input      [XLEN          -1:0] bu_nxt_pc,
                                   st_nxt_pc,
                                   du_dato,
   input                           ex_stall,
-                                  du_stall,
+                                  du_stall,*/
 
   //Program counter
-  input      [XLEN          -1:0] if_pc,
-  output reg [XLEN          -1:0] id_pc,
-  input      [               1:0] if_bp_predict,
-  output reg [               1:0] id_bp_predict,
+  input      [PCLEN          -1:0] if_pc,
+  output reg [PCLEN          -1:0] id_pc,
+  //input      [               1:0] if_bp_predict,
+  //output reg [               1:0] id_bp_predict,
 
 
   //Instruction
@@ -54,17 +54,19 @@ module asa_id_stage (
   input                           wb_bubble,
 
   //Exceptions
-  input      [EXCEPTION_SIZE-1:0] if_exception,
+  /*input      [EXCEPTION_SIZE-1:0] if_exception,
                                   ex_exception,
                                   wb_exception,
   output reg [EXCEPTION_SIZE-1:0] id_exception,
 
   //From State
-  input      [               1:0] st_prv,
+  input      [               1:0] st_prv,*/
 
   //To RF
-  output     [               4:0] id_src1,
-                                  id_src2,
+  output     [               4:0] id_rs1,
+                                  id_rs2,
+  input      [XLEN          -1:0] RS1,
+                                  RS2,
 
   //To execution units
   output reg [XLEN          -1:0] id_opA,
@@ -171,7 +173,8 @@ module asa_id_stage (
   //assign if_func7   = if_instr[31:25];
   //assign if_func3   = if_instr[14:12];
 
-  assign id_opcode  = id_instr [ 6:2];
+  //assign id_opcode  = id_instr [ 6:2];
+  assign id_opcode  = if_instr [ 6:2];
   //assign ex_opcode  = ex_instr [ 6:2];
   //assign wb_opcode  = wb_instr [ 6:2];
   assign id_dst     = id_instr [11:7];
@@ -214,10 +217,10 @@ module asa_id_stage (
    */
   //address into register file. Gets registered in memory
   //Should the hold be handled by the memory?!
-  //assign id_src1 = ~(du_stall || ex_stall) ? if_instr[19:15] : id_instr[19:15];
-  //assign id_src2 = ~(du_stall || ex_stall) ? if_instr[24:20] : id_instr[24:20];
-  assign id_src1 = id_instr[19:15];
-  assign id_src2 = id_instr[24:20];
+  //assign id_rs1 = ~(du_stall || ex_stall) ? if_instr[19:15] : id_instr[19:15];
+  //assign id_rs2 = ~(du_stall || ex_stall) ? if_instr[24:20] : id_instr[24:20];
+  assign id_rs1 = id_instr[19:15];
+  assign id_rs2 = id_instr[24:20];
 
   //assign if_src1 = if_instr[19:15];
   //assign if_src2 = if_instr[24:20];
@@ -230,8 +233,8 @@ module asa_id_stage (
    */
   //assign immI = { {XLEN-11{id_instr[31]}}, id_instr[30:25], id_instr[24:21],id_instr[20] };
   //assign immU = { {XLEN-31{id_instr[31]}}, id_instr[30:12], 12'b0 };
-  assign immI = { {XLEN-12{id_instr[31]}}, id_instr[31:20]};
-  assign immU = { id_instr[31:12], 12'b0 };
+  assign immI = { {XLEN-12{if_instr[31]}}, if_instr[31:20]};
+  assign immU = { if_instr[31:12], 12'b0 };
 
 
   /*
