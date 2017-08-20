@@ -27,32 +27,14 @@ module asa_id_stage (
   input                           clk,
   output reg                      id_stall,
 
-/*  input                           bu_flush,
-                                  st_flush,
-                                  du_flush,
-  input      [XLEN          -1:0] bu_nxt_pc,
-                                  st_nxt_pc,
-                                  du_dato,
-  input                           ex_stall,
-                                  du_stall,*/
-
   //Program counter
   input      [PCLEN          -1:0] if_pc,
   output reg [PCLEN          -1:0] id_pc,
-  //input      [               1:0] if_bp_predict,
-  //output reg [               1:0] id_bp_predict,
-
+  
 
   //Instruction
-  input      [INSTR_SIZE    -1:0] if_instr,
-  input                           if_bubble,
   output reg [INSTR_SIZE    -1:0] id_instr,
-  output reg                      id_bubble,
-  input      [INSTR_SIZE    -1:0] ex_instr,
-  input                           ex_bubble,
-  input      [INSTR_SIZE    -1:0] wb_instr,
-  input                           wb_bubble,
-
+  
   //Exceptions
   /*input      [EXCEPTION_SIZE-1:0] if_exception,
                                   ex_exception,
@@ -77,10 +59,10 @@ module asa_id_stage (
                                   id_bypex_opA,
                                   id_bypex_opB,
                                   id_bypwb_opA,
-                                  id_bypwb_opB,
+                                  id_bypwb_opB
 
   //from WB
-  input      [XLEN          -1:0] wb_r
+  //input      [XLEN          -1:0] wb_r
 );
 
 
@@ -94,8 +76,11 @@ module asa_id_stage (
 
 
   //Immediates
-  logic [XLEN          -1:0] immI,
-                             immU;
+  logic [XLEN          -1:0] immI;
+  logic [XLEN          -1:0] immS;
+  logic [XLEN          -1:0] immB;
+  logic [XLEN          -1:0] immU;
+  logic [XLEN          -1:0] immJ;
 
   //Opcodes
   logic [               6:2] if_opcode,
@@ -137,49 +122,11 @@ module asa_id_stage (
   // Module Body
   //
   import riscv_pkg::*;
-  //import riscv_state_pkg::*;
-
-
-  /*
-   * Program Counter
-   *
-  always @(posedge clk,negedge rstn)
-    if      (!rstn                 ) id_pc <= PC_INIT;
-    else if ( st_flush             ) id_pc <= st_nxt_pc;
-    else if ( bu_flush ||  du_flush) id_pc <= bu_nxt_pc; //Is this required?! 
-    else if (!stall    && !id_stall) id_pc <= if_pc;
-
-  /*
-   * Instruction
-   *
-  always @(posedge clk,negedge rstn)
-    if      (!rstn ) id_instr <= INSTR_NOP;
-    else if (!stall) id_instr <= if_instr;
-
-
-  always @(posedge clk,negedge rstn)
-    if      (!rstn                            ) id_bubble_r <= 1'b1;
-    else if ( bu_flush || st_flush || du_flush) id_bubble_r <= 1'b1;
-    else if (!stall                           )
-      if  (id_stall) id_bubble_r <= 1'b1;
-      else           id_bubble_r <= if_bubble;
-
-  //local stall
-  assign stall = ex_stall | (du_stall & (~id_bubble_r | |id_exception));
-  assign id_bubble = stall | bu_flush | st_flush | |ex_exception | |wb_exception | id_bubble_r;
-  */
-
-  //assign if_opcode  = if_instr[ 6: 2];
-  //assign if_func7   = if_instr[31:25];
-  //assign if_func3   = if_instr[14:12];
-
-  //assign id_opcode  = id_instr [ 6:2];
+  
   assign id_opcode  = if_instr [ 6:2];
-  //assign ex_opcode  = ex_instr [ 6:2];
-  //assign wb_opcode  = wb_instr [ 6:2];
+
   assign id_dst     = id_instr [11:7];
-  //assign ex_dst     = ex_instr [11:7];
-  //assign wb_dst     = wb_instr [11:7];
+  
 
   assign is_rv64    = (XLEN       == 64);
   assign has_fp     = (HAS_FPU    !=  0);
@@ -190,42 +137,11 @@ module asa_id_stage (
   //assign has_hyper  = (HAS_HYPER  !=  0);
 
 
-  //always @(posedge clk)
-  //  if (!stall && !id_stall) id_bp_predict <= if_bp_predict;
-
-  /*
-   * Exceptions
-   *
-  always @(posedge clk, negedge rstn)
-    if      (!rstn                ) id_exception <= 'h0;
-    else if ( bu_flush || st_flush) id_exception <= 'h0;
-    else if (!stall               )
-        if ( id_stall) id_exception <= 'h0;
-        else 
-        begin
-            id_exception                            <= if_exception;
-            id_exception[CAUSE_ILLEGAL_INSTRUCTION] <= ~if_bubble & illegal_instr;
-            id_exception[CAUSE_BREAKPOINT         ] <= ~if_bubble & (if_instr == EBREAK);
-            id_exception[CAUSE_UMODE_ECALL        ] <= ~if_bubble & (if_instr == ECALL ) & (st_prv == PRV_U) & has_user;
-            id_exception[CAUSE_SMODE_ECALL        ] <= ~if_bubble & (if_instr == ECALL ) & (st_prv == PRV_S) & has_super;
-            id_exception[CAUSE_HMODE_ECALL        ] <= ~if_bubble & (if_instr == ECALL ) & (st_prv == PRV_H) & has_hyper;
-            id_exception[CAUSE_MMODE_ECALL        ] <= ~if_bubble & (if_instr == ECALL ) & (st_prv == PRV_M);
-        end
-   */
-  /*
-   * To Register File
-   */
-  //address into register file. Gets registered in memory
-  //Should the hold be handled by the memory?!
-  //assign id_rs1 = ~(du_stall || ex_stall) ? if_instr[19:15] : id_instr[19:15];
-  //assign id_rs2 = ~(du_stall || ex_stall) ? if_instr[24:20] : id_instr[24:20];
+ 
   assign id_rs1 = id_instr[19:15];
   assign id_rs2 = id_instr[24:20];
 
-  //assign if_src1 = if_instr[19:15];
-  //assign if_src2 = if_instr[24:20];
-
-
+  
   /*
    * Decode Immediates
    *
@@ -234,7 +150,10 @@ module asa_id_stage (
   //assign immI = { {XLEN-11{id_instr[31]}}, id_instr[30:25], id_instr[24:21],id_instr[20] };
   //assign immU = { {XLEN-31{id_instr[31]}}, id_instr[30:12], 12'b0 };
   assign immI = { {XLEN-12{if_instr[31]}}, if_instr[31:20]};
+  assign immS = { {XLEN-12{if_instr[31]}}, if_instr[31:25], if_instr[11:7]};
+  assign immB = {};
   assign immU = { if_instr[31:12], 12'b0 };
+  assign immJ = {};
 
 
   /*
